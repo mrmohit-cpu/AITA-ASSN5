@@ -1,0 +1,106 @@
+#Model a 2-input XOR gate with Multi-layer perceptron by backpropogation algorithm
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the sigmoid activation function
+def sigmoid(x):
+  return 1 / (1 + np.exp(-x))
+
+# Define the derivative of the sigmoid function
+def sigmoid_derivative(x):
+  return x * (1 - x)
+
+# Input dataset
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+
+# Output dataset
+y = np.array([[0], [1], [1], [0]])
+
+# Initialize weights and biases randomly
+np.random.seed(1)
+weights_hidden = np.random.rand(2, 2)
+bias_hidden = np.random.rand(1, 2)
+weights_output = np.random.rand(2, 1)
+bias_output = np.random.rand(1, 1)
+
+# Training parameters
+learning_rate = 0.1
+epochs = 10000
+
+# Training loop
+for epoch in range(epochs):
+  # Forward propagation
+  hidden_layer_activation = np.dot(X, weights_hidden) + bias_hidden
+  hidden_layer_output = sigmoid(hidden_layer_activation)
+  output_layer_activation = np.dot(hidden_layer_output, weights_output) + bias_output
+  predicted_output = sigmoid(output_layer_activation)
+
+  # Backpropagation
+  error = y - predicted_output
+  d_predicted_output = error * sigmoid_derivative(predicted_output)
+
+  error_hidden_layer = d_predicted_output.dot(weights_output.T)
+  d_hidden_layer = error_hidden_layer * sigmoid_derivative(hidden_layer_output)
+
+  # Update weights and biases
+  weights_output += hidden_layer_output.T.dot(d_predicted_output) * learning_rate
+  bias_output += np.sum(d_predicted_output, axis=0, keepdims=True) * learning_rate
+  weights_hidden += X.T.dot(d_hidden_layer) * learning_rate
+  bias_hidden += np.sum(d_hidden_layer, axis=0, keepdims=True) * learning_rate
+
+# Test the trained model
+print("Predictions:")
+print(predicted_output)
+
+#Graph
+plt.plot(y, label='Actual Output')
+plt.plot(predicted_output, label='Predicted Output')
+plt.xlabel('Input Data Point')
+plt.ylabel('Output')
+plt.title('Neural Network Output vs. Actual Output')
+plt.legend()
+plt.show()
+
+#Sigmoid function graph 
+
+# Generate x values for the sigmoid function
+sigmoid_x = np.linspace(-10, 10, 100)
+
+# Calculate the corresponding y values using the sigmoid function
+sigmoid_y = sigmoid(sigmoid_x)
+
+# Plot the sigmoid function
+plt.plot(sigmoid_x, sigmoid_y)
+plt.xlabel('x')
+plt.ylabel('sigmoid(x)')
+plt.title('Sigmoid Function')
+plt.grid(True)
+plt.show()
+
+#Accuracy and loss graph
+
+# Initialize weights and biases randomly
+np.random.seed(1)
+weights_hidden = np.random.rand(2, 2)
+bias_hidden = np.random.rand(1, 2)
+weights_output = np.random.rand(2, 1)
+bias_output = np.random.rand(1, 1)
+
+# Training parameters
+learning_rate = 0.1
+epochs = 10000
+
+# Define different optimizers
+def gradient_descent(weights, bias, gradient, learning_rate):
+  weights -= learning_rate * gradient
+  bias -= learning_rate * np.sum(gradient, axis=0, keepdims=True)
+  return weights, bias
+
+def momentum(weights, bias, gradient, learning_rate, momentum_rate=0.9, velocity=None):
+  if velocity is None:
+    velocity = np.zeros_like(gradient)
+  velocity = momentum_rate * velocity - learning_rate * gradient
+  weights += velocity
+  bias += np.sum(velocity, axis=0, keepdims=True)
+def adam(weights, bias, gradient, learning_rate, beta1=0.9, beta2=0.99):
+  return weights, bias, velocity
